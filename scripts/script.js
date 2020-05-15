@@ -1,6 +1,11 @@
 $(document).ready(function () {
   //add search button functionality
-  //clear search box
+  $("#search-button").on("click", function() {
+    var searchValue = $("#search-value").val();
+
+    // clear search box
+    $("#search-value").val("");
+
   //append searched cities below search box
   //Display current city
   //Display current date
