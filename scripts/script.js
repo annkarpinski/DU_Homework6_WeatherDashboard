@@ -1,1 +1,1 @@
-//Weather Dashboard JS
+$(document).ready(function () {});
