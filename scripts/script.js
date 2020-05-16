@@ -70,28 +70,3 @@ $(document).ready(function () {
 //     url: URLFor5Day,
 //   });
 // }
-
-// TO DO LIST
-// -x-Grab user's text input and put the value .val() into a variable that is used in the ajax call
-// -x-Create ajax call that gets the following from weather api
-//     -x-city name
-//     -x-today's date
-//     -x-icon
-//     -x-temperature in F (convert if needed)
-//     -x-RH
-//     -x-Wind speed in mph (convert if needed)
-//     -x-UV index
-// -x-Create ajax call that gets the following from weather api
-//     -x-5 day forecast
-//         -x-date
-//         -x-icon
-//         -x-temp
-//         -x-rh
-//     -x-Function that clears the input after the search button is clicked
-//     -x-Function that displays today's weather on the page
-//     -x-Function that displays the 5 day forecast on the page
-//     -x-Clear the Today's Weather Section when search button is clicked
-//     -x-Check if city already exists in history
-//     -x-Function that adds any value searched to an array in local storage, if not there already
-//     -x-Function that adds values from array in local storage to the history section-gonna need a loop dee loop
-//     -x-add event listener to each city (maybe use delegation?) so that when clicked, performs search based on the value of the text
