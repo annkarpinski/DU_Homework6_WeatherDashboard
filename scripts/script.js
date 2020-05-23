@@ -94,20 +94,19 @@ $(document).ready(function () {
       $.ajax({
         url: queryLatLon,
         method: "GET",
-      }).then(function (response2) {
-        console.log(response2);
-        var uvNumber = response2.current.uvi;
+      }).then(function (data) {
+        console.log(data);
+        var uvNumber = data.current.uvi;
         var currentUVI = $("<p>").text("UV Index: ");
         currentCardData.append(currentUVI);
-        var uvColor = $("<span>").text(uvNumber);
+        var uvColor = $("<span>").addClass("btn btn-sm").text(uvNumber);
         //Add UV color coding
-        if (Math.floor(uvNumber) >= 0 && Math.floor(uvNumber) <= 2) {
-          uvColor.addClass("btn btn-success");
-        } else if (Math.floor(uvNumber) >= 3 && Math.floor(uvNumber) <= 7) {
-          uvColor.addClass("btn btn-warning");
-        } else if (Math.floor(uvNumber) >= 8) {
-          uvColor.addClass("btn btn-danger");
+        if (uvNumber < 3) {
+          uvColor.addClass("btn-success");
+        } else if (uvNumber < 7) {
+          uvColor.addClass("btn-warning");
         } else {
+          uvColor.addClass("btn-danger");
         }
         $("#today .card-body").append(currentUVI.append(uvColor));
       });
