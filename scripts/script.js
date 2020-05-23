@@ -96,18 +96,20 @@ $(document).ready(function () {
         method: "GET",
       }).then(function (response2) {
         console.log(response2);
-        var uvIndex = response2.current.uvi;
-        var currentUVI = $("<p>").text("UV Index: " + uvIndex);
+        var uvNumber = response2.current.uvi;
+        var currentUVI = $("<p>").text("UV Index: ");
         currentCardData.append(currentUVI);
-        var btn = $("<span>").addClass("btn btn-sm").text(response2.value);
-        if (response2.value < 3) {
-          btn.addClass("btn-success");
-        } else if (response2.value < 7) {
-          btn.addClass("btn-warning");
+        var uvColor = $("<span>").text(uvNumber);
+        //Add UV color coding
+        if (Math.floor(uvNumber) >= 0 && Math.floor(uvNumber) <= 2) {
+          uvColor.addClass("btn btn-success");
+        } else if (Math.floor(uvNumber) >= 3 && Math.floor(uvNumber) <= 7) {
+          uvColor.addClass("btn btn-warning");
+        } else if (Math.floor(uvNumber) >= 8) {
+          uvColor.addClass("btn btn-danger");
         } else {
-          btn.addClass("btn-danger");
         }
-        $("#today .card-body").append(currentUVI.append(btn));
+        $("#today .card-body").append(currentUVI.append(uvColor));
       });
       //https://api.openweathermap.org/data/2.5/onecall?lat=" + response.coord.lat + "&lon=" + response.coord.lon + "&exclude={part}&appid={your api key}
       //Append current weather card and contents to the page
