@@ -5,24 +5,29 @@ $(document).ready(function () {
   $("#search-button").on("click", function () {
     var cityName = $("#search-value").val();
 
-    //push cityName to searchHistory array upon user click on Search button
-    //save to localstorage.setItem
-    //then display searchHistory array as new list in #history
-    function addToHistory(cityName) {
-      var newCity = $("<li>");
-      newCity.text(cityName);
-    }
+    // //push cityName to searchHistory array upon user click on Search button
+    // //save to localstorage.setItem
+    // //then display searchHistory array as new list in #history
+    // function addToHistory(cityName) {
+    //   var newCity = $("<li>");
+    //   newCity
+    //     .text(cityName)
+    //     .attr("class", "list-group-item list-group-item-action");
+    //   $("#history").append(newCity);
+    // }
 
-    searchHistory.push(cityName);
+    // if (storedCities.index0f(cityName) === -1) {
+    //   searchHistory.push(cityName);
+    //   localStorage.setItem("userInput", JSON.stringify(searchHistory));
+    //   addToHistory(cityName);
+    // }
 
-    localStorage.setItem("userInput", JSON.stringify(searchHistory));
+    // // Call the cities in local storage back when page is refreshed
+    // var storedCities = JSON.parse(localStorage.getItem("userInput"));
+    // console.log(storedCities);
 
-    // Call the cities in local storage back when page is refreshed
-    var storedCities = JSON.parse(localStorage.getItem("userInput"));
-    console.log(storedCities);
-
-    searchHistory = storedCities;
-    //prepend searched cities below search box
+    // searchHistory = storedCities;
+    // //prepend searched cities below search box
 
     // clear search box
     $("#search-value").val("");
@@ -46,10 +51,9 @@ $(document).ready(function () {
       method: "GET",
     }).then(function (response) {
       // make another ajax call for one call api aka for the uvi and feed in the lat and lon from the current weather data api response
-      console.log(response);
       //variables for data to display on current weather card
       var city = response.name;
-      var currentDate = new Date().toLocaleDateString();
+      var currentDate = moment().format("M/DD/YYYY");
       var temp = response.main.temp;
       var humidity = response.main.humidity;
       var wind = response.wind.speed;
@@ -62,7 +66,7 @@ $(document).ready(function () {
         .text(city + currentDate);
       var currentWeatherIcon = $("<img>").attr(
         "src",
-        "http://openweathermap.org/img/wn/" + response.weather[0].icon + ".png"
+        "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png"
       );
       var currentCardData = $("<ul>")
         .addClass("card-text")
@@ -74,6 +78,10 @@ $(document).ready(function () {
       var currentHumidity = $("<p>").text("Humidity: " + humidity + "%");
       var currentWind = $("<p>").text("Wind Speed: " + wind + " MPH");
 
+      //clear current weather when another city is searched
+      current.empty();
+
+      //nested API call and AJAX method for lat and lon to connect to cities objects in weather and forecast APIs to get UV data
       var queryLatLon =
         "https://api.openweathermap.org/data/2.5/onecall?lat=" +
         response.coord.lat +
@@ -88,9 +96,18 @@ $(document).ready(function () {
         method: "GET",
       }).then(function (response2) {
         console.log(response2);
-        var uvi = response2.current.uvi;
-        var currentUVI = $("<p>").text("UV Index: " + uvi);
+        var uvIndex = response2.current.uvi;
+        var currentUVI = $("<p>").text("UV Index: " + uvIndex);
         currentCardData.append(currentUVI);
+        var btn = $("<span>").addClass("btn btn-sm").text(response2.value);
+        if (response2.value < 3) {
+          btn.addClass("btn-success");
+        } else if (response2.value < 7) {
+          btn.addClass("btn-warning");
+        } else {
+          btn.addClass("btn-danger");
+        }
+        $("#today .card-body").append(currentUVI.append(btn));
       });
       //https://api.openweathermap.org/data/2.5/onecall?lat=" + response.coord.lat + "&lon=" + response.coord.lon + "&exclude={part}&appid={your api key}
       //Append current weather card and contents to the page
@@ -102,11 +119,7 @@ $(document).ready(function () {
     });
   }
 
-  //https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={your api key}
-  //https://api.openweathermap.org/data/2.5/onecall?lat=" + response.coord.lat + "&lon=" + response.coord.lon + "&exclude={part}&appid={your api key}
-  //https://api.openweathermap.org/data/2.5/forecast?q={city name}&appid={your api key}
-
-  //   function to get 5-day forecast
+  //function to get 5-day forecast
   function fiveDayForecast(cityName) {
     var queryURL =
       "https://api.openweathermap.org/data/2.5/forecast?q=" +
@@ -123,10 +136,12 @@ $(document).ready(function () {
         .html('<h4 class="mt-3">5-Day Forecast:</h4>')
         .append('<div class="row">');
 
-      //Need to write loop to create 5 cards for 5-day forecast
+      //Loop to create 5 cards for 5-day forecast
       for (i = 0; i < 5; i++) {
         //variables for data to display on 5-day forecast weather cards
-        var forecastDate = new Date().toLocaleDateString();
+        var forecastDate = moment()
+          .add(i + 1, "days")
+          .format("M/DD/YYYY");
         var forecastWeatherIcon = response.list[i].weather.icon;
         var forecastTemp = response.list[i].main.temp;
         var forecastHumidity = response.list[i].main.humidity;
@@ -142,7 +157,7 @@ $(document).ready(function () {
           .attr("id", "forecastData");
         var forecastWeatherIcon = $("<img>").attr(
           "src",
-          "http://openweathermap.org/img/wn/" +
+          "http://openweathermap.org/img/w/" +
             response.list[i].weather[0].icon +
             ".png"
         );
