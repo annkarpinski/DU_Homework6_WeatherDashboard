@@ -1,6 +1,19 @@
 $(document).ready(function () {
   //variable to hold user city searches
-  // var searchHistory = [];
+  var searchHistory = [];
+
+  // Everytime page refresh, grab cities from local storage
+  // Parsing the JSON string to an object
+  var storedCities = JSON.parse(localStorage.getItem("cityName"));
+
+  // If cities were retrieved from localStorage, update the cities array to it
+  if (storedCities !== null) {
+    searchHistory = storedCities;
+  }
+
+  console.log(searchHistory);
+  // Render the array of cities to the history <ul>
+
   //add search button functionality
   $("#search-button").on("click", function () {
     var cityName = $("#search-value").val();
@@ -8,39 +21,31 @@ $(document).ready(function () {
     //Press Enter key to begin search
     // $(document).on("keypress", "input", function (e) {
     //   if (e.which == 13) {
-    //     cityName = $("#search-value").val();
+    //     $("#search-value").val();
     //   }
     // });
 
-    // clear search box
-    $("#search-value").val("");
+    //push cityName to searchHistory array upon user click on Search button
+    //save to localstorage.setItem
+    //then display searchHistory array as new list in #history
+    function addToHistory(array) {
+      var newCity = $("<li>").text(cityName);
+      $("#history").prepend(array);
+      console.log(newCity);
+    }
+
+    // if (searchHistory.index0f(cityName) === -1) {
+    searchHistory.push(cityName);
+    console.log(searchHistory);
+    localStorage.setItem("cityName", JSON.stringify(searchHistory));
+    addToHistory(searchHistory);
+    // }
 
     currentWeather(cityName);
     fiveDayForecast(cityName);
 
-    // //push cityName to searchHistory array upon user click on Search button
-    // //save to localstorage.setItem
-    // //then display searchHistory array as new list in #history
-    // function addToHistory(cityName) {
-    //   var newCity = $("<li>");
-    //   newCity
-    //     .text(cityName)
-    //     .attr("class", "list-group-item list-group-item-action");
-    //   $("#history").append(newCity);
-    // }
-
-    // if (storedCities.index0f(cityName) === -1) {
-    //   searchHistory.push(cityName);
-    //   localStorage.setItem("userInput", JSON.stringify(searchHistory));
-    //   addToHistory(cityName);
-    // }
-
-    // // Call the cities in local storage back when page is refreshed
-    // var storedCities = JSON.parse(localStorage.getItem("userInput"));
-    // console.log(storedCities);
-
-    // searchHistory = storedCities;
-    // //prepend searched cities below search box
+    // clear search box
+    $("#search-value").val("");
   });
 
   var apiKey = "74fef4641e0974b5f048a0fe6206abb8";
@@ -134,24 +139,25 @@ $(document).ready(function () {
       url: queryURL,
       method: "GET",
     }).then(function (response) {
-      var forecastHeader = $("<h3>")
-        .text("5-Day Forecast")
-        .attr("class", "m-3");
-      $("#forecastHeader").append(forecastHeader);
+      //clear forecast info when user searches for new city
+      $("#forecastHeader").empty();
+      var forecast = $("#forecast");
+      forecast.empty();
+      var forecastH3 = $("<h3>").text("5-Day Forecast").attr("class", "m-3");
+      $("#forecastHeader").append(forecastH3);
 
       //Loop to create 5 cards for 5-day forecast
-      for (i = 0; i < 5; i++) {
+      for (i = 6; i < response.list.length; i += 8) {
         // if (data.list[i].dt_txt.indexOf("15:00:00") !== -1) {
         //variables for data to display on 5-day forecast weather cards
-        var forecastDate = moment()
-          .add(i + 1, "days")
-          .format("M/DD/YYYY");
+        // i = 0, i = 1, i = 2, i = 3, i = 4
+        // i = 6, i = 14, i = 22, i = 30, i = 38
+        var forecastDate = moment(response.list[i].dt_txt).format("MM/DD/YYYY");
         var forecastWeatherIcon = response.list[i].weather.icon;
         var forecastTemp = response.list[i].main.temp;
         var forecastHumidity = response.list[i].main.humidity;
 
         //Create HTML elements for forecast weather
-        var forecast = $("#forecast");
         var forecastCol = $("<div>").attr("class", "col-md-2");
         var forecastCard = $("<div>").addClass("card bg-primary");
         var forecastCardTitle = $("<h5>")
@@ -182,8 +188,5 @@ $(document).ready(function () {
         );
       }
     });
-    // //clear forecast info when user searches for new city
-    // forecastHeader.empty();
-    // forecast.empty();
   }
 });
