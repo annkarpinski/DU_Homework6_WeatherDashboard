@@ -1,9 +1,22 @@
 $(document).ready(function () {
   //variable to hold user city searches
-  var searchHistory = [];
+  // var searchHistory = [];
   //add search button functionality
   $("#search-button").on("click", function () {
     var cityName = $("#search-value").val();
+
+    //Press Enter key to begin search
+    // $(document).on("keypress", "input", function (e) {
+    //   if (e.which == 13) {
+    //     cityName = $("#search-value").val();
+    //   }
+    // });
+
+    // clear search box
+    $("#search-value").val("");
+
+    currentWeather(cityName);
+    fiveDayForecast(cityName);
 
     // //push cityName to searchHistory array upon user click on Search button
     // //save to localstorage.setItem
@@ -28,12 +41,6 @@ $(document).ready(function () {
 
     // searchHistory = storedCities;
     // //prepend searched cities below search box
-
-    // clear search box
-    $("#search-value").val("");
-
-    currentWeather(cityName);
-    fiveDayForecast(cityName);
   });
 
   var apiKey = "74fef4641e0974b5f048a0fe6206abb8";
@@ -60,20 +67,15 @@ $(document).ready(function () {
 
       //Create HTML elements for current weather
       var current = $("#current");
-      var currentCard = $("<div>").addClass("card");
+      var currentCard = $("<div>").addClass("card").attr("class", "m-3");
       var currentCardTitle = $("<h3>")
         .addClass("card-title")
-        .text(city + currentDate);
+        .text(city + " " + "(" + currentDate + ")");
       var currentWeatherIcon = $("<img>").attr(
         "src",
         "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png"
       );
-      var currentCardData = $("<ul>")
-        .addClass("card-text")
-        .attr("id", "currentData");
-      var currentCardData = $("<ul>")
-        .addClass("card-text")
-        .attr("id", "currentData");
+      var currentCardData = $("<div>").addClass("card-text");
       var currentTemp = $("<p>").text("Temperature: " + temp + " °F");
       var currentHumidity = $("<p>").text("Humidity: " + humidity + "%");
       var currentWind = $("<p>").text("Wind Speed: " + wind + " MPH");
@@ -95,7 +97,7 @@ $(document).ready(function () {
         url: queryLatLon,
         method: "GET",
       }).then(function (data) {
-        console.log(data);
+        //Add UV index to current weather
         var uvNumber = data.current.uvi;
         var currentUVI = $("<p>").text("UV Index: ");
         currentCardData.append(currentUVI);
@@ -110,7 +112,7 @@ $(document).ready(function () {
         }
         $("#today .card-body").append(currentUVI.append(uvColor));
       });
-      //https://api.openweathermap.org/data/2.5/onecall?lat=" + response.coord.lat + "&lon=" + response.coord.lon + "&exclude={part}&appid={your api key}
+
       //Append current weather card and contents to the page
       current.append(currentCard);
       currentCard.append(currentCardTitle);
@@ -132,13 +134,14 @@ $(document).ready(function () {
       url: queryURL,
       method: "GET",
     }).then(function (response) {
-      console.log(response);
-      $("#forecast")
-        .html('<h4 class="mt-3">5-Day Forecast:</h4>')
-        .append('<div class="row">');
+      var forecastHeader = $("<h3>")
+        .text("5-Day Forecast")
+        .attr("class", "m-3");
+      $("#forecastHeader").append(forecastHeader);
 
       //Loop to create 5 cards for 5-day forecast
       for (i = 0; i < 5; i++) {
+        // if (data.list[i].dt_txt.indexOf("15:00:00") !== -1) {
         //variables for data to display on 5-day forecast weather cards
         var forecastDate = moment()
           .add(i + 1, "days")
@@ -149,12 +152,13 @@ $(document).ready(function () {
 
         //Create HTML elements for forecast weather
         var forecast = $("#forecast");
-        var forecastCard = $("<div>").addClass("card");
-        var forecastCardTitle = $("<h3>")
-          .addClass("card-title")
+        var forecastCol = $("<div>").attr("class", "col-md-2");
+        var forecastCard = $("<div>").addClass("card bg-primary");
+        var forecastCardTitle = $("<h5>")
+          .addClass("card-title text-white ml-3 mt-2")
           .text(forecastDate);
-        var forecastCardData = $("<ul>")
-          .addClass("card-text")
+        var forecastCardData = $("<div>")
+          .addClass("card-text text-white ml-3")
           .attr("id", "forecastData");
         var forecastWeatherIcon = $("<img>").attr(
           "src",
@@ -168,9 +172,9 @@ $(document).ready(function () {
         );
 
         //Append forecast weather cards and contents to the page
-        forecast.append(forecastCard);
-        forecastCard.append(forecastCardTitle);
-        forecastCard.append(forecastCardData);
+        forecast.append(forecastCol);
+        forecastCol.append(forecastCard);
+        forecastCard.append(forecastCardTitle, forecastCardData);
         forecastCardData.append(
           forecastWeatherIcon,
           forecastTemp,
@@ -178,5 +182,8 @@ $(document).ready(function () {
         );
       }
     });
+    // //clear forecast info when user searches for new city
+    // forecastHeader.empty();
+    // forecast.empty();
   }
 });
