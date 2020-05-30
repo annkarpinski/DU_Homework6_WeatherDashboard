@@ -1,8 +1,9 @@
 $(document).ready(function () {
+  // localStorage.clear();
   //variable to hold user city searches
   var searchHistory = [];
 
-  // Everytime page refresh, grab cities from local storage
+  // Every time page refreshes, grab cities from local storage
   // Parsing the JSON string to an object
   var storedCities = JSON.parse(localStorage.getItem("cityName"));
 
@@ -11,35 +12,36 @@ $(document).ready(function () {
     searchHistory = storedCities;
   }
 
-  console.log(searchHistory);
-  // Render the array of cities to the history <ul>
+  function renderCities() {
+    // Clear history list element
+    $("#history").empty();
 
-  //add search button functionality
-  $("#search-button").on("click", function () {
+    // Render a new li for each city
+    for (var i = 0; i < searchHistory.length; i++) {
+      var city = searchHistory[i];
+
+      var li = $("<li>");
+      li.text(city);
+      li.addClass("list-group-item list-group-item-action");
+      li.attr("data-name", city);
+
+      $("#history").prepend(li);
+    }
+  }
+
+  //add search button functionality and allow hitting Enter to enable click button
+  $("#search-button").on("click", function (event) {
+    event.preventDefault();
     var cityName = $("#search-value").val();
 
-    //Press Enter key to begin search
-    // $(document).on("keypress", "input", function (e) {
-    //   if (e.which == 13) {
-    //     $("#search-value").val();
-    //   }
-    // });
-
     //push cityName to searchHistory array upon user click on Search button
-    //save to localstorage.setItem
+    //save to localStorage
     //then display searchHistory array as new list in #history
-    function addToHistory(array) {
-      var newCity = $("<li>").text(cityName);
-      $("#history").prepend(array);
-      console.log(newCity);
+    if (searchHistory.indexOf(cityName) === -1) {
+      searchHistory.push(cityName);
+      localStorage.setItem("cityName", JSON.stringify(searchHistory));
+      renderCities();
     }
-
-    // if (searchHistory.index0f(cityName) === -1) {
-    searchHistory.push(cityName);
-    console.log(searchHistory);
-    localStorage.setItem("cityName", JSON.stringify(searchHistory));
-    addToHistory(searchHistory);
-    // }
 
     currentWeather(cityName);
     fiveDayForecast(cityName);
@@ -62,7 +64,6 @@ $(document).ready(function () {
       url: queryURL,
       method: "GET",
     }).then(function (response) {
-      // make another ajax call for one call api aka for the uvi and feed in the lat and lon from the current weather data api response
       //variables for data to display on current weather card
       var city = response.name;
       var currentDate = moment().format("M/DD/YYYY");
@@ -147,11 +148,10 @@ $(document).ready(function () {
       $("#forecastHeader").append(forecastH3);
 
       //Loop to create 5 cards for 5-day forecast
+      //api returns forecast every 3 hours, so get forecast data for 3:00pm each day
+      //first forecast day for 3:00pm is at index 6 and adding 8 indices to get to 3:00pm the next day
       for (i = 6; i < response.list.length; i += 8) {
-        // if (data.list[i].dt_txt.indexOf("15:00:00") !== -1) {
         //variables for data to display on 5-day forecast weather cards
-        // i = 0, i = 1, i = 2, i = 3, i = 4
-        // i = 6, i = 14, i = 22, i = 30, i = 38
         var forecastDate = moment(response.list[i].dt_txt).format("MM/DD/YYYY");
         var forecastWeatherIcon = response.list[i].weather.icon;
         var forecastTemp = response.list[i].main.temp;
@@ -189,4 +189,15 @@ $(document).ready(function () {
       }
     });
   }
+
+  // Render the array of cities to the history <ul>
+  renderCities();
+
+  // Adding a click event listener to all cities in history
+  $(document).on("click", "li", function () {
+    // console.log(event.target.textContent);
+    var cityName = $(this).attr("data-name");
+    currentWeather(cityName);
+    fiveDayForecast(cityName);
+  });
 });
